@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class PixelatedCamera : MonoBehaviour
 {
 
-    public int screenScaleFactor = 2;
+    public int scaledHeight;
     public RawImage display;
 
     private int screenWidth, screenHeight;
@@ -20,15 +20,15 @@ public class PixelatedCamera : MonoBehaviour
 
     public void Init()
     {
-        if (screenScaleFactor == 0)
-        {
-            screenScaleFactor = 1;
-        }
-
         screenWidth = Screen.width;
         screenHeight = Screen.height;
-        var width = screenWidth / screenScaleFactor;
-        var height = screenHeight / screenScaleFactor;
+        if (scaledHeight <= 0 || scaledHeight > screenHeight)
+        {
+            scaledHeight = screenHeight;
+        }
+
+        var width = scaledHeight * screenWidth / screenHeight;
+        var height = scaledHeight;
 
         renderTexture = new RenderTexture(width, height, 24) {
             filterMode = FilterMode.Point,
