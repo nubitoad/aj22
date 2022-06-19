@@ -9,11 +9,9 @@ public class PixelatedCamera : MonoBehaviour
 {
     public int scaledHeight;
     public RawImage display;
+    public RenderTexture[] outputs = new RenderTexture[4];
 
     private int screenWidth, screenHeight;
-
-    public RenderTexture[] outputs = new RenderTexture[4];
-    public Material mat;
 
     void Start()
     {

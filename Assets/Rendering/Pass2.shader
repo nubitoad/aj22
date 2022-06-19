@@ -41,7 +41,16 @@
             sampler2D _Col3;
             float4 frag (v2f i) : SV_Target
             {
-                return tex2D(_Col2, i.uv);
+                float4 col = tex2D(_Col0, i.uv);
+
+                float4 myId = tex2D(_Col3, i.uv);
+                float4 xId = tex2D(_Col3, i.uv + float2(1./320., 0));
+                float4 yId = tex2D(_Col3, i.uv + float2(0, 1./447.));
+                if (length(myId - xId) > .001 || length(myId - yId) > .001)
+                {
+                    col /= 2.;
+                }
+                return col;
             }
             ENDCG
         }
