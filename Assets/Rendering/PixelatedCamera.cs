@@ -22,12 +22,8 @@ public class PixelatedCamera : MonoBehaviour
     {
         screenWidth = Screen.width;
         screenHeight = Screen.height;
-        if (scaledHeight <= 0 || scaledHeight > screenHeight)
-        {
-            scaledHeight = screenHeight;
-        }
-        var width = scaledHeight * screenWidth / screenHeight;
-        var height = scaledHeight;
+        var scaledWidth = (int) (1.0f * scaledHeight / screenHeight * screenWidth);
+        Debug.LogWarning("Initializing textures " + scaledWidth + "x" + scaledHeight);
 
         var camera = GetComponent<Camera>();
         camera.targetTexture = null;
@@ -35,12 +31,11 @@ public class PixelatedCamera : MonoBehaviour
         var buffers = new RenderBuffer[outputs.Length];
         for (var i = 0; i < outputs.Length; ++i)
         {
-            outputs[i].Release();
-            outputs[i].width = width;
-            outputs[i].height = height;
-            outputs[i].depth = 24;
-            outputs[i].filterMode = FilterMode.Point;
-            outputs[i].antiAliasing = 1;
+            if (outputs[i].IsCreated()) {
+                outputs[i].Release();
+            }
+            outputs[i].width = scaledWidth;
+            outputs[i].height = scaledHeight;
             outputs[i].Create();
             buffers[i] = outputs[i].colorBuffer;
         }
@@ -50,7 +45,7 @@ public class PixelatedCamera : MonoBehaviour
 
     void Update()
     {
-        if (Screen.width != screenWidth || Screen.width != screenHeight)
+        if (Screen.width != screenWidth || Screen.height != screenHeight)
         {
             Init();
         }

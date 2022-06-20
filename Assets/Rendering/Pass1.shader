@@ -1,4 +1,6 @@
-﻿Shader "AJ/Pass1"
+﻿// Upgrade NOTE: replaced 'UNITY_INSTANCE_ID' with 'UNITY_VERTEX_INPUT_INSTANCE_ID'
+
+Shader "AJ/Pass1"
 {
     Properties
     {
@@ -27,15 +29,16 @@
                 float2 uv : TEXCOORD0;
                 float4 vertex : POSITION;
                 float3 normal : NORMAL;
-                fixed4 diff : COLOR0;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct v2f
             {
                 float2 uv : TEXCOORD0;
                 float3 pos : TEXCOORD1;
-                float4 vertex : SV_POSITION;
-                fixed4 diff : COLOR0;
+                float4 clipPos : POSITION0;
+                float4 vertex : POSITION1;
+                float3 normal : NORMAL;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
@@ -60,12 +63,12 @@
                 UNITY_TRANSFER_INSTANCE_ID(v, o);
 
                 o.pos = mul(unity_ObjectToWorld, v.vertex);
-                o.vertex = UnityObjectToClipPos(v.vertex);
+                o.clipPos = UnityObjectToClipPos(v.vertex);
                 o.uv = v.uv;
+                o.vertex = v.vertex;
 
                 half3 worldNormal = UnityObjectToWorldNormal(v.normal);
-                half nl = max(0, dot(worldNormal, _WorldSpaceLightPos0.xyz));
-                o.diff = nl * _LightColor0;
+                o.normal = worldNormal;
 
                 return o;
             }
@@ -75,10 +78,13 @@
                 UNITY_SETUP_INSTANCE_ID(i);
                 int id = UNITY_ACCESS_INSTANCED_PROP(Props, _ID);
 
+                half nl = max(0, dot(i.normal, _WorldSpaceLightPos0.xyz));
+                float diff = smoothstep(.4, .4, nl * _LightColor0) * .7 + .3;
+
                 f2a OUT;
-                OUT.col0 = tex2D(_MainTex, i.uv) * _Color;
-                OUT.col1 = float4(i.pos, 1);
-                OUT.col2 = i.diff;
+                OUT.col0 = tex2D(_MainTex, i.uv) * _Color * diff;
+                OUT.col1 = float4(i.normal / 2. + .5, i.clipPos.z);
+                OUT.col2 = i.clipPos;
                 OUT.col3 = float4(_Color.xyz, id / 256.);
                 return OUT;
             }
